@@ -1,0 +1,70 @@
+Alpha Neon Enterprise Master Blueprint 1. System Overview (GCP-Optimized)
+Alpha Neon is an institutional-grade arbitrage execution layer designed for high-frequency flash loan operations. It leverages ERC-4337 Account Abstraction via Pimlico Paymasters for gasless execution. The system is built on a serverless, event-driven architecture on Google Cloud, ensuring high scalability, low latency, and robust observability.
+
+2. Technical Stack (GCP Services Highlighted)
+Compute (Bots): Google Cloud Run (for Scanner, Orchestrator, Executor Bots)
+AI Core: Google Vertex AI (for Gemini 3 Pro/Flash)
+Messaging: Google Pub/Sub
+Databases:
+Google Cloud SQL for PostgreSQL (Transactional/Operational Data)
+Google Memorystore for Redis (High-Speed Cache/Transient Data)
+Google BigQuery (Analytical Data Warehouse)
+Secrets Management: Google Secret Manager
+Blockchain Layer:
+Account Abstraction: Pimlico (Bundler + Paymaster)
+Liquidity: Aave v3, Uniswap v3, Balancer
+Network: Arbitrum / Base (L2 for low latency)
+MEV Protection: Flashbots RPC relays
+3. The Tri-Tier Bot Architecture (GCP Implementation)
+Each bot will be implemented as a Cloud Run service , enabling independent scaling, rapid deployment, and a pay-per-use cost model. Communication between bots will be asynchronous via Pub/Sub topics .
+
+Scanner Bot ( alpha-neon-scanner ) :
+Purpose: Continuous mempool monitoring for DEX price disparities.
+GCP Implementation: Cloud Run service, configured for high concurrency and low latency. Deployed in a GCP region geographically optimized for proximity to blockchain nodes and Flashbots RPC endpoints.
+Output: Publishes raw, filtered mempool events to alpha-neon-scanner-output .
+Orchestrator Bot ( alpha-neon-orchestrator ) :
+Purpose: Decision engine. Consumes mempool events, queries Vertex AI (Gemini) to validate strategy ROI against current gas-sponsorship limits, and fetches liquidity depth data.
+GCP Implementation: Cloud Run service, triggered by messages from alpha-neon-scanner-output .
+Integrations:
+Communicates with Vertex AI to access Gemini models for strategy forging.
+Uses Memorystore for Redis ( alpha-neon-redis ) for high-speed caching of real-time market data, external API responses (e.g., BitQuery, DexTools), and intermediate strategy states.
+Retrieves external API keys (BitQuery, DexTools Premium, Etherscan Pro) from Secret Manager ( alpha-neon-api-keys ).
+Output: Publishes validated arbitrage opportunities to alpha-neon-orchestrator-output . Logs strategy decisions and relevant data to BigQuery ( alpha-neon-analytics ) for analytics.
+Executor Bot ( alpha-neon-executor ) :
+Purpose: The "Relay." Batches Flash Loan + Swap + Repayment into a single UserOperation for the Pimlico Bundler.
+GCP Implementation: Cloud Run service, triggered by messages from alpha-neon-orchestrator-output .
+Integrations:
+Interacts directly with blockchain networks (Arbitrum/Base) and Pimlico Bundler/Paymaster.
+Uses Secret Manager ( alpha-neon-db-credentials and alpha-neon-api-keys ) for secure storage of blockchain private keys and other sensitive execution credentials.
+May use Memorystore for Redis ( alpha-neon-redis ) for very short-lived execution state or rate limiting.
+Output: Logs detailed transaction outcomes (success/failure, profit/loss, gas used) to Cloud SQL for PostgreSQL ( alpha-neon-tx-db ) for operational records and to BigQuery ( alpha-neon-analytics ) for long-term analytics.
+4. Data & AI Layer (GCP Services)
+Transaction Database ( alpha-neon-tx-db ) :
+GCP Service: Cloud SQL for PostgreSQL.
+Purpose: Stores critical, persistent operational data such as executed trades, wallet balances, strategy performance metrics, and audit trails. Configured for high availability.
+High-Speed Cache ( alpha-neon-redis ) :
+GCP Service: Memorystore for Redis.
+Purpose: Provides ultra-low latency access to frequently changing market data, external API responses, and transient state needed by the Orchestrator and Executor bots.
+Analytics Warehouse ( alpha-neon-analytics ) :
+GCP Service: BigQuery.
+Purpose: Centralized repository for all historical data (mempool events, strategy decisions, execution results, market data). Enables deep analytical queries, machine learning model training, and dashboarding.
+AI Core Management ( arbinexus-vertex-ai ) :
+GCP Service: Vertex AI.
+Purpose: Provides a managed platform for deploying and managing Gemini models. Offers better control over model versions, access, and potentially higher throughput than direct public API access.
+5. Security & Management (GCP Services)
+Secrets Management ( alpha-neon-db-credentials , alpha-neon-api-keys ) :
+GCP Service: Secret Manager.
+Purpose: Securely stores all sensitive credentials (database passwords, blockchain private keys, external API keys for BitQuery, DexTools, Etherscan Pro, Flashbots RPC).
+Messaging Backbone ( alpha-neon-scanner-output , alpha-neon-orchestrator-output ) :
+GCP Service: Pub/Sub.
+Purpose: Provides asynchronous, reliable, and scalable communication between the bot services, decoupling them and improving overall system resilience.
+Observability:
+GCP Services: Cloud Monitoring, Cloud Logging, Cloud Trace.
+Purpose: Comprehensive monitoring of bot performance, resource utilization, and transaction flows. Centralized logging for debugging and auditing.
+6. Execution Workflow (The "Loop" - Upgraded)
+Detection : alpha-neon-scanner finds a disparity > 0.3% and publishes to alpha-neon-scanner-output .
+Strategy Forge : alpha-neon-orchestrator consumes the event, retrieves relevant API keys from alpha-neon-api-keys , queries arbinexus-vertex-ai (Gemini) with discovery context, and fetches liquidity data via external APIs (cached in alpha-neon-redis ).
+Validation : alpha-neon-orchestrator confirms ROI, logs strategy decision to alpha-neon-analytics , and publishes validated opportunity to alpha-neon-orchestrator-output .
+Sponsorship : alpha-neon-executor consumes the event, retrieves blockchain private keys from alpha-neon-api-keys , and triggers Pimlico Paymaster for gas sponsorship.
+Atomic Execution : alpha-neon-executor triggers the flash loan contract via Flashbots RPC.
+Settlement : Profits swept to Primary AA Wallet. alpha-neon-executor logs detailed execution results to alpha-neon-tx-db and alpha-neon-analytics

@@ -1,0 +1,63 @@
+steps:
+  # Build scanner service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/scanner-service:$COMMIT_SHA', './scanner/']
+
+  # Push scanner image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/scanner-service:$COMMIT_SHA']
+
+  # Build orchestrator service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/orchestrator-service:$COMMIT_SHA', './orchestrator/']
+
+  # Push orchestrator image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/orchestrator-service:$COMMIT_SHA']
+
+  # Build executor service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/executor-service:$COMMIT_SHA', './executor/']
+
+  # Push executor image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/executor-service:$COMMIT_SHA']
+
+  # Build backend service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/backend-service:$COMMIT_SHA', './backend/']
+
+  # Push backend image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/backend-service:$COMMIT_SHA']
+
+  # Build frontend service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/frontend-service:$COMMIT_SHA', './frontend/']
+
+  # Push frontend image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/alpha-orion-repo/frontend-service:$COMMIT_SHA']
+
+  # Deploy with Terraform
+  - name: 'hashicorp/terraform'
+    args: ['init']
+    dir: 'terraform/'
+
+  - name: 'hashicorp/terraform'
+    args: ['plan', '-out=tfplan']
+    dir: 'terraform/'
+
+  - name: 'hashicorp/terraform'
+    args: ['apply', '-auto-approve', 'tfplan']
+    dir: 'terraform/'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+# Store build artifacts
+artifacts:
+  objects:
+    location: 'gs://alpha-orion-build-artifacts/'
+    paths: ['terraform/tfplan']
