@@ -84,8 +84,20 @@ resource "google_alloydb_cluster" "secondary" {
     kms_key_name = google_kms_crypto_key.key.id
   }
 
-  continuous_backup_config {
-    enabled = true
+  automated_backup_policy {
+    location      = var.region_eu
+    backup_window = "1800s"
+    enabled       = true
+
+    weekly_schedule {
+      days_of_week = ["SUNDAY"]
+      start_times {
+        hours   = 23
+        minutes = 0
+        seconds = 0
+        nanos   = 0
+      }
+    }
   }
 
   depends_on = [google_alloydb_cluster.primary]
