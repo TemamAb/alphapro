@@ -578,8 +578,9 @@ class LiveDeploymentOrchestrator:
                     return {
                         "passed": passed,
                         "api_response": {
-                        "passed result,
-                        "integration_status": "active" if passed else "failed"
+                            "status": result.get('status'),
+                            "integration_status": "active" if passed else "failed"
+                        }
                     }
                     
         except Exception as e:

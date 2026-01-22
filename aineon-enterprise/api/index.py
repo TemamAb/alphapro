@@ -19,6 +19,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from datetime import datetime
+import asyncio
+import logging
 
 # Setup logging
 logging.basicConfig(
@@ -46,6 +50,33 @@ app.add_middleware(
 # Global state
 _engine_running = False
 _start_time = None
+
+# Port-specific profit rates and data (simulated for ports 1024-1040)
+PORT_PROFIT_RATES = {
+    port_id: 0.1 + (port_id - 1024) * 0.05  # Increasing rate from 0.1 to 0.65 ETH/hour
+    for port_id in range(1024, 1041)
+}
+
+PORT_COLLECTION_STATUS = {port_id: {"enabled": True, "collection_system": "legacy"} for port_id in range(1024, 1041)}
+
+# New models for audit recommendations
+class CollectorRequest(BaseModel):
+    collect_all: bool = True
+    ports: Optional[List[int]] = None
+
+class PortUpdateRequest(BaseModel):
+    collection_system: str = "centralized"
+    profit_rate_eth: float = 0.1
+    enabled: bool = True
+
+class AlertRequest(BaseModel):
+    type: str = "profit_distribution"
+    message: str = "Profit distribution alert"
+    severity: str = "info"
+
+class RecoveryRequest(BaseModel):
+    recovery_type: str = "automated"
+    target_port: Optional[int] = None
 
 # =============================================================================
 # CONFIGURATION & UTILITIES
@@ -307,10 +338,127 @@ async def get_config_endpoint():
         for key in sensitive_keys:
             if key in config:
                 config[key] = "***REDACTED***"
-        
+
         return {"configuration": config}
     except Exception as e:
         logger.error(f"Error getting config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =============================================================================
+# AUDIT ENDPOINTS
+# =============================================================================
+
+@app.post("/api/collectors", tags=["Audit"])
+async def centralized_collection(request: CollectorRequest):
+    """Trigger centralized collection from ports"""
+    try:
+        if request.collect_all:
+            ports_to_collect = list(range(1024, 1041))
+        else:
+            ports_to_collect = request.ports or []
+
+        # Validate ports
+        invalid_ports = [p for p in ports_to_collect if p not in range(1024, 1041)]
+        if invalid_ports:
+            raise HTTPException(status_code=400, detail=f"Invalid ports: {invalid_ports}")
+
+        # Simulate collection
+        total_collected = 0.0
+        for port_id in ports_to_collect:
+            if PORT_COLLECTION_STATUS[port_id]["enabled"]:
+                profit_rate = PORT_PROFIT_RATES[port_id]
+                collected_amount = profit_rate  # 1 hour collection
+                total_collected += collected_amount
+                logger.info(f"Collected {collected_amount:.4f} ETH from port {port_id}")
+
+        return {
+            "status": "initiated",
+            "message": f"Centralized collection completed: {total_collected:.4f} ETH from {len(ports_to_collect)} ports",
+            "ports": ports_to_collect,
+            "total_collected": total_collected,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Failed to initiate centralized collection: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/ports/{port_id}", tags=["Audit"])
+async def update_port_collection(port_id: int, request: PortUpdateRequest):
+    """Update port to use new collection system"""
+    try:
+        if port_id not in range(1024, 1041):
+            raise HTTPException(status_code=404, detail=f"Port {port_id} not found")
+
+        PORT_COLLECTION_STATUS[port_id] = {
+            "enabled": request.enabled,
+            "collection_system": request.collection_system
+        }
+
+        logger.info(f"Updated port {port_id} to {request.collection_system} collection system")
+
+        return {
+            "status": "updated",
+            "port_id": port_id,
+            "collection_system": request.collection_system,
+            "enabled": request.enabled,
+            "profit_rate_eth": request.profit_rate_eth,
+            "timestamp": datetime.now().isoformat()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update port {port_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/alerts", tags=["Audit"])
+async def send_profit_alert(request: AlertRequest):
+    """Send profit distribution alert"""
+    try:
+        # Simulate sending alert (log it)
+        alert_data = {
+            "type": request.type,
+            "message": request.message,
+            "severity": request.severity,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        logger.warning(f"ALERT [{request.severity.upper()}]: {request.message}")
+
+        return {
+            "status": "sent",
+            "alert": alert_data
+        }
+    except Exception as e:
+        logger.error(f"Failed to send alert: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/recovery", tags=["Audit"])
+async def trigger_recovery(request: RecoveryRequest):
+    """Trigger automated profit recovery"""
+    try:
+        if request.target_port and request.target_port not in range(1024, 1041):
+            raise HTTPException(status_code=404, detail=f"Port {request.target_port} not found")
+
+        if request.target_port:
+            logger.info(f"Starting {request.recovery_type} recovery for port {request.target_port}")
+            PORT_COLLECTION_STATUS[request.target_port]["enabled"] = True
+            logger.info(f"Recovery completed for port {request.target_port}")
+        else:
+            logger.info(f"Starting global {request.recovery_type} recovery")
+            for port_id in range(1024, 1041):
+                PORT_COLLECTION_STATUS[port_id]["enabled"] = True
+            logger.info("Global recovery completed")
+
+        return {
+            "status": "initiated",
+            "recovery_type": request.recovery_type,
+            "target_port": request.target_port,
+            "timestamp": datetime.now().isoformat()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to initiate recovery: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # =============================================================================

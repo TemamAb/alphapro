@@ -329,7 +329,7 @@ The AINEON Hybrid Enterprise Dashboard is now deployed with:
 """
             
             report_path = self.root_dir / "HYBRID_DASHBOARD_DEPLOYMENT_REPORT.md"
-            with open(report_path, 'w') as f:
+            with open(report_path, 'w', encoding='utf-8') as f:
                 f.write(report)
             
             logger.info(f"✓ Deployment report created: {report_path}")

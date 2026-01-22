@@ -1,5 +1,12 @@
 node_modules
-npm-debug.log
+dashboard/node_modules
 .git
-.gitignore
-.DS_Store
+dist
+dashboard/dist
+venv
+.venv
+*.log
+__pycache__
+*.pyc
+*.pyo
+*.pyd

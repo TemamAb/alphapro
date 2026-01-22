@@ -1,878 +1,655 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AINEON Hybrid Enterprise Dashboard - Master + Cyberpunk Fusion</title>
+    <title>AINEON Hybrid Enterprise Cockpit v1.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            /* Hybrid Color System */
-            --primary-green: #00ff88;
-            --primary-red: #FF3333;
-            --primary-cyan: #00d4ff;
-            --primary-blue: #0099ff;
-            --primary-purple: #9966ff;
-            --primary-orange: #ff9900;
-            
-            /* Dark Theme (Grafana-Cyberpunk) */
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #151515;
-            --bg-tertiary: #1a1a1a;
-            --bg-card: #222222;
-            --bg-hover: #2a2a2a;
-            
-            /* Text Colors */
-            --text-primary: #ffffff;
-            --text-secondary: #b0b3c1;
-            --text-tertiary: #8e8e8e;
-            
-            /* Borders */
-            --border-primary: #333333;
-            --border-highlight: #00ff88;
-            
-            /* Gradients */
-            --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
-            --gradient-secondary: linear-gradient(135deg, #0099ff 0%, #9966ff 100%);
+            --primary: #00ff88;
+            --secondary: #00d4ff;
+            --accent: #9966ff;
+            --danger: #ff3333;
+            --warning: #ffaa00;
+            --bg-deep: #050505;
+            --bg-panel: #111111;
+            --bg-card: #1a1a1a;
+            --border: #222222;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            cursor: default;
         }
-        
+
         body {
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
         }
-        
-        .dashboard-wrapper {
-            display: flex;
-            min-height: 100vh;
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
         }
-        
-        /* Enhanced Sidebar */
+
+        /* Layout Architecture */
+        .app-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            height: 100vh;
+        }
+
+        /* Sidebar */
         .sidebar {
-            width: 280px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border-primary);
-            padding: 1.5rem 0;
-            overflow-y: auto;
-            transition: width 0.3s ease;
-        }
-        
-        .sidebar.collapsed {
-            width: 60px;
-        }
-        
-        .sidebar-logo {
-            padding: 1rem 1.5rem;
-            font-size: 1.3rem;
-            font-weight: 700;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-        }
-        
-        .nav-item:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border-left-color: var(--primary-green);
-        }
-        
-        .nav-item.active {
-            background: var(--bg-hover);
-            color: var(--primary-green);
-            border-left-color: var(--primary-green);
-        }
-        
-        /* Main Content */
-        .main-content {
-            flex: 1;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            padding: 1.5rem 0;
+            z-index: 50;
         }
-        
-        /* Enhanced Header */
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-primary);
-            padding: 1rem 2rem;
+
+        .brand {
+            padding: 0 1.5rem 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.025em;
             display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-dim);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.05) 0%, transparent 100%);
+            border-left-color: var(--primary);
+        }
+
+        /* Main Content Area */
+        .main-stage {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 64px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            gap: 2rem;
+            padding: 0 2rem;
+            background-color: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 40;
         }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-        
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        
-        .status-pill {
+
+        .status-badge {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--primary-green);
-            border-radius: 20px;
-            color: var(--primary-green);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background-color: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(0, 255, 136, 0.2);
         }
-        
+
         .status-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--primary-green);
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary);
             border-radius: 50%;
-            animation: pulse 2s infinite;
+            box-shadow: 0 0 8px var(--primary);
         }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .theme-toggle, .refresh-btn {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-primary);
-            color: var(--text-primary);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .theme-toggle:hover, .refresh-btn:hover {
-            background: var(--bg-hover);
-            border-color: var(--primary-green);
-        }
-        
-        /* Content Area */
-        .content {
-            flex: 1;
+
+        /* Grid System */
+        .grid-canvas {
             padding: 2rem;
-            overflow-y: auto;
-            background: var(--bg-primary);
-        }
-        
-        /* Metrics Grid - Adaptive 6 Columns */
-        .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(12, 1fr);
             gap: 1.5rem;
-            margin-bottom: 2rem;
         }
-        
-        .metric-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-primary);
+
+        .panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            position: relative;
             overflow: hidden;
+            transition: border-color 0.2s ease;
         }
-        
-        .metric-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--border-highlight);
-            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.1);
+
+        .panel:hover {
+            border-color: #333;
         }
-        
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-primary);
-        }
-        
-        .metric-card-header {
+
+        /* Metric Cells */
+        .metric-cell {
+            padding: 1.25rem;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
         }
-        
-        .metric-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-primary);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-        
-        .metric-card-title {
-            font-size: 0.85rem;
+
+        .metric-label {
+            font-size: 0.7rem;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.05em;
         }
-        
-        .metric-card-value {
-            font-size: 2rem;
+
+        .metric-value {
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+            color: var(--text-main);
         }
-        
-        .metric-change {
-            font-size: 0.85rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        
-        .change-positive {
-            background: rgba(0, 255, 136, 0.1);
-            color: var(--primary-green);
-        }
-        
-        .change-negative {
-            background: rgba(255, 51, 51, 0.1);
-            color: var(--primary-red);
-        }
-        
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .chart-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-primary);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-        
-        .chart-title {
-            font-size: 1.1rem;
+
+        .metric-delta {
+            font-size: 0.75rem;
             font-weight: 600;
-            margin-bottom: 1rem;
         }
-        
-        .chart-canvas {
-            height: 300px;
+
+        .delta-up {
+            color: var(--primary);
         }
-        
-        /* AI Terminal */
-        .ai-terminal-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--primary-purple);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+
+        .delta-down {
+            color: var(--danger);
         }
-        
-        .ai-terminal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        
-        .ai-terminal-title {
-            font-size: 1.2rem;
+
+        .data-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            color: var(--primary-purple);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
         }
-        
-        .ai-terminal-display {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            border-radius: 8px;
+
+        .data-table td {
+            padding: 0.75rem 1rem;
+            font-size: 0.8125rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.01);
+        }
+
+        /* Terminal CSS */
+        .terminal-box {
+            background-color: #000;
             padding: 1rem;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.85rem;
-            color: var(--primary-green);
-            height: 200px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: #ccc;
+            height: 240px;
             overflow-y: auto;
-            margin-bottom: 1rem;
+            scroll-behavior: smooth;
         }
-        
-        .ai-terminal-line {
+
+        .terminal-line {
+            line-height: 1.4;
             margin-bottom: 0.25rem;
         }
-        
-        .ai-input-group {
-            display: flex;
-            gap: 0.5rem;
+
+        .terminal-time {
+            color: var(--text-dim);
+            maring-right: 0.5rem;
         }
-        
-        .ai-input {
-            flex: 1;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-primary);
-            color: var(--text-primary);
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.9rem;
-        }
-        
-        .ai-send-btn {
-            background: var(--gradient-secondary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+
+        .terminal-tag {
             font-weight: 600;
         }
-        
-        /* Withdrawal Card */
-        .withdrawal-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--primary-cyan);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+
+        .tag-info {
+            color: var(--secondary);
         }
-        
-        .withdrawal-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary-cyan);
-            margin-bottom: 1.5rem;
+
+        .tag-success {
+            color: var(--primary);
         }
-        
-        .mode-toggle {
-            display: flex;
-            gap: 0.5rem;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            padding: 0.25rem;
-            margin-bottom: 1.5rem;
+
+        .tag-engine {
+            color: var(--accent);
         }
-        
-        .mode-btn {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-        
-        .mode-btn.active {
-            background: var(--primary-green);
-            color: var(--bg-primary);
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
         }
-        
-        .mode-btn:not(.active) {
-            background: transparent;
-            color: var(--text-secondary);
+
+        ::-webkit-scrollbar-thumb {
+            background: #222;
+            border-radius: 3px;
         }
-        
-        /* Responsive Design */
-        @media (max-width: 1400px) {
-            .metrics-grid {
-                grid-template-columns: repeat(5, 1fr);
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #333;
+        }
+
+        /* Animation Overrides - NO SHAKING */
+        @keyframes subtle-fade {
+            from {
+                opacity: 0.8;
+            }
+
+            to {
+                opacity: 1;
             }
         }
-        
-        @media (max-width: 1200px) {
-            .metrics-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+
+        button {
+            cursor: pointer !important;
         }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-            }
-            
-            .sidebar-logo {
-                font-size: 1rem;
-            }
-            
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-            
-            .content {
-                padding: 1rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
+
+        a {
+            cursor: pointer !important;
         }
     </style>
 </head>
+
 <body>
-    <div class="dashboard-wrapper">
-        <!-- Sidebar -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <div class="sidebar-logo">🚀 AINEON</div>
-            <nav>
-                <div class="nav-item active">📊 Dashboard</div>
-                <div class="nav-item">💰 Withdrawal</div>
-                <div class="nav-item">⚙️ Engines</div>
-                <div class="nav-item">📈 Analytics</div>
-                <div class="nav-item">🤖 AI Terminal</div>
-                <div class="nav-item">🔧 Settings</div>
+            <div class="brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <span>AINEON v1.0</span>
+            </div>
+            <nav class="flex-1">
+                <div class="nav-link active">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12h18M3 6h18M3 18h18" />
+                    </svg>
+                    <span>Enterprise Dashboard</span>
+                </div>
+                <div class="nav-link" onclick="window.location.hash='#withdrawal'">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 2v20m-5-5h10M7 7h10" />
+                    </svg>
+                    <span>Smart Withdrawals</span>
+                </div>
+                <div class="nav-link">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                    </svg>
+                    <span>MEV Strategy Hub</span>
+                </div>
+                <div class="nav-link">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>System Analytics</span>
+                </div>
             </nav>
+            <div class="px-6 py-4 border-t border-gray-800">
+                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Connected Node</div>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="text-xs font-medium text-gray-300">Ethereum Mainnet</span>
+                </div>
+            </div>
         </aside>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <div class="header-left">
-                    <h1 class="page-title">Elite Hybrid Dashboard</h1>
-                    <div class="status-pill">
+
+        <!-- Main Workspace -->
+        <main class="main-stage">
+            <header>
+                <div class="flex items-center gap-4">
+                    <h2 class="text-sm font-bold tracking-tight text-gray-400 uppercase">Production Cockpit</h2>
+                    <div class="status-badge">
                         <div class="status-dot"></div>
-                        Real-time Active
+                        <span>LIVE: ENGINE ACTIVE</span>
                     </div>
                 </div>
-                <div class="header-right">
-                    <button class="theme-toggle">🌙 Theme</button>
-                    <button class="refresh-btn">🔄 Refresh</button>
+                <div class="flex items-center gap-6">
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] uppercase font-bold text-gray-500">Current Gas</span>
+                        <span class="text-xs font-bold text-primary mono" id="gas-price-display">-- Gwei</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] uppercase font-bold text-gray-500">Block Height</span>
+                        <span class="text-xs font-bold text-secondary mono" id="block-number-display">-------</span>
+                    </div>
+                    <button
+                        class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-3 py-1.5 rounded text-xs font-bold transition-colors">
+                        FORCE REFRESH
+                    </button>
                 </div>
             </header>
-            
-            <!-- Content -->
-            <div class="content">
-                <!-- Metrics Grid (40+ cards) -->
-                <div class="metrics-grid">
-                    <!-- Profit Metrics -->
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">💰</div>
-                        </div>
-                        <div class="metric-card-title">Total Profit</div>
-                        <div class="metric-card-value">$137.5K</div>
-                        <div class="metric-change change-positive">+2.1% today</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">⏱️</div>
-                        </div>
-                        <div class="metric-card-title">Hourly Rate</div>
-                        <div class="metric-card-value">$24.3K</div>
-                        <div class="metric-change change-positive">+0.5%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">📅</div>
-                        </div>
-                        <div class="metric-card-title">Daily Profit</div>
-                        <div class="metric-card-value">$582.2K</div>
-                        <div class="metric-change change-positive">+18.7%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">📊</div>
-                        </div>
-                        <div class="metric-card-title">Weekly Profit</div>
-                        <div class="metric-card-value">$4.07M</div>
-                        <div class="metric-change change-positive">+24.3%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">📈</div>
-                        </div>
-                        <div class="metric-card-title">Monthly Profit</div>
-                        <div class="metric-card-value">$17.4M</div>
-                        <div class="metric-change change-positive">+31.2%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">✅</div>
-                        </div>
-                        <div class="metric-card-title">Success Rate</div>
-                        <div class="metric-card-value">89.4%</div>
-                        <div class="metric-change change-positive">+0.3%</div>
-                    </div>
-                    
-                    <!-- Gas & Performance -->
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">⛽</div>
-                        </div>
-                        <div class="metric-card-title">Gas Spent</div>
-                        <div class="metric-card-value">$12.4K</div>
-                        <div class="metric-change change-negative">-8.2%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">⚡</div>
-                        </div>
-                        <div class="metric-card-title">Avg Latency</div>
-                        <div class="metric-card-value">7.8ms</div>
-                        <div class="metric-change change-positive">-1.3ms</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">🚀</div>
-                        </div>
-                        <div class="metric-card-title">Throughput</div>
-                        <div class="metric-card-value">305 TPS</div>
-                        <div class="metric-change change-positive">+47 today</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">📡</div>
-                        </div>
-                        <div class="metric-card-title">Node Sync</div>
-                        <div class="metric-card-value">99.8%</div>
-                        <div class="metric-change change-positive">Optimal</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">💾</div>
-                        </div>
-                        <div class="metric-card-title">Memory Usage</div>
-                        <div class="metric-card-value">345.5 MB</div>
-                        <div class="metric-change change-positive">45%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">⚙️</div>
-                        </div>
-                        <div class="metric-card-title">System Load</div>
-                        <div class="metric-card-value">67.2%</div>
-                        <div class="metric-change change-positive">Healthy</div>
-                    </div>
-                    
-                    <!-- Strategy Metrics (more cards for 40+ total) -->
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">🔍</div>
-                        </div>
-                        <div class="metric-card-title">Opportunities</div>
-                        <div class="metric-card-value">247</div>
-                        <div class="metric-change change-positive">+12% today</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">✔️</div>
-                        </div>
-                        <div class="metric-card-title">Executed</div>
-                        <div class="metric-card-value">189</div>
-                        <div class="metric-change change-positive">76.5%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">🏆</div>
-                        </div>
-                        <div class="metric-card-title">Best Strategy</div>
-                        <div class="metric-card-value">Flash Loan</div>
-                        <div class="metric-change change-positive">$42.3K</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">⛓️</div>
-                        </div>
-                        <div class="metric-card-title">Top Chain</div>
-                        <div class="metric-card-value">Ethereum</div>
-                        <div class="metric-change change-positive">78.5%</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">🔄</div>
-                        </div>
-                        <div class="metric-card-title">Top Pair</div>
-                        <div class="metric-card-value">ETH/USDC</div>
-                        <div class="metric-change change-positive">$38.9K</div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-card-header">
-                            <div class="metric-icon">🧠</div>
-                        </div>
-                        <div class="metric-card-title">AI Learning</div>
-                        <div class="metric-card-value">87.3%</div>
-                        <div class="metric-change change-positive">+2.1%</div>
+
+            <div class="grid-canvas">
+                <!-- Top Metrics Row -->
+                <div class="panel col-span-3 metric-cell">
+                    <div class="metric-label">Total Verified Profit</div>
+                    <div class="metric-value mono text-primary" id="val-total-profit">0.0000 ETH</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-500" id="val-total-profit-usd">$0.00 USD</span>
+                        <span class="metric-delta delta-up">↑ 12.5%</span>
                     </div>
                 </div>
-                
-                <!-- Charts Section -->
-                <div class="charts-grid">
-                    <div class="chart-container">
-                        <h3 class="chart-title">💰 Profit Analytics</h3>
-                        <canvas id="profitChart" class="chart-canvas"></canvas>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <h3 class="chart-title">⚡ MEV Strategy Performance</h3>
-                        <canvas id="mevChart" class="chart-canvas"></canvas>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <h3 class="chart-title">🤖 AI Learning Progress</h3>
-                        <canvas id="aiChart" class="chart-canvas"></canvas>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <h3 class="chart-title">📊 Latency Benchmark</h3>
-                        <canvas id="latencyChart" class="chart-canvas"></canvas>
+                <div class="panel col-span-3 metric-cell">
+                    <div class="metric-label">24h Generation</div>
+                    <div class="metric-value mono" id="val-daily-profit">0.00 ETH</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-500">Avg. 0.04/hr</span>
+                        <span class="metric-delta delta-up">↑ 4.2%</span>
                     </div>
                 </div>
-                
-                <!-- AI Terminal Section -->
-                <div class="ai-terminal-section">
-                    <div class="ai-terminal-header">
-                        <h2 class="ai-terminal-title">🤖 AI Terminal</h2>
-                        <div>
-                            <select style="background: var(--bg-tertiary); color: var(--text-primary); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-primary);">
-                                <option>OpenAI</option>
-                                <option>Gemini</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="ai-terminal-display" id="aiTerminal">
-                        <div class="ai-terminal-line">[19:17:43] 🤖 AI: Initializing...</div>
-                        <div class="ai-terminal-line">[19:17:44] ✅ AI: Connected to API</div>
-                        <div class="ai-terminal-line">[19:17:45] 🧠 AI: Analyzing patterns...</div>
-                        <div class="ai-terminal-line">[19:17:46] 📊 AI: Learning progress: 87.3%</div>
-                    </div>
-                    
-                    <div class="ai-input-group">
-                        <input type="text" class="ai-input" placeholder="Ask the AI about trading strategies..." id="aiInput">
-                        <button class="ai-send-btn">Send</button>
+                <div class="panel col-span-3 metric-cell">
+                    <div class="metric-label">Arbitrage Success Rate</div>
+                    <div class="metric-value mono text-secondary">94.8%</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-500">542 Executions</span>
+                        <span class="metric-delta delta-up">OPTIMAL</span>
                     </div>
                 </div>
-                
-                <!-- Withdrawal Section -->
-                <div class="withdrawal-section">
-                    <h2 class="withdrawal-title">💸 Profit Withdrawal</h2>
-                    
-                    <div class="mode-toggle">
-                        <button class="mode-btn active">🔄 Auto Mode</button>
-                        <button class="mode-btn">👤 Manual Mode</button>
+                <div class="panel col-span-3 metric-cell">
+                    <div class="metric-label">Smart Wallet Balance</div>
+                    <div class="metric-value mono">10.57 ETH</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-500">0x845...2d7</span>
+                        <span
+                            class="text-[10px] font-bold text-secondary px-1.5 py-0.5 bg-secondary/10 rounded">ERC-4337</span>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                        <div>
-                            <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">Available Balance</label>
-                            <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary-green); margin-bottom: 1rem;">45.08 ETH</div>
+                </div>
+
+                <!-- Main Analytics Section -->
+                <div class="panel col-span-8 flex flex-col">
+                    <div class="p-4 border-b border-border flex justify-between items-center">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Execution Velocity (Live)
+                        </h3>
+                        <div class="flex gap-2">
+                            <span
+                                class="px-2 py-1 bg-primary/10 text-primary rounded text-[10px] font-bold">PROFIT</span>
+                            <span
+                                class="px-2 py-1 bg-secondary/10 text-secondary rounded text-[10px] font-bold">GAS</span>
                         </div>
-                        <div>
-                            <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">Withdrawal Address</label>
-                            <input type="text" style="width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem;" value="0xA51E466e659Cf9DdD5a5CA9ECDd8392302102490" readonly>
+                    </div>
+                    <div class="p-6 flex-1 min-h-[300px]">
+                        <canvas id="velocityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Verified Transactions Panel -->
+                <div class="panel col-span-4 flex flex-col">
+                    <div class="p-4 border-b border-border">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Blockchain Validation</h3>
+                    </div>
+                    <div class="flex-1 overflow-y-auto max-h-[360px]">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Tx Hash</th>
+                                    <th>Block</th>
+                                    <th>Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-table-body">
+                                <!-- Populated by JS -->
+                                <tr>
+                                    <td colspan="3" class="text-center py-10 text-gray-600 italic">Syncing with
+                                        Mainnet...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-3 border-t border-border bg-black/20 text-center">
+                        <a href="https://etherscan.io" target="_blank"
+                            class="text-[10px] font-bold text-gray-400 hover:text-primary transition-colors uppercase tracking-widest">View
+                            All on Etherscan →</a>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Terminal and MEV Analysis -->
+                <div class="panel col-span-7 flex flex-col">
+                    <div class="p-4 border-b border-border flex justify-between items-center bg-black/40">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-primary">Intelligence Command (AI)
+                        </h3>
+                        <span class="mono text-[10px] text-primary">v1.2-ALPHA</span>
+                    </div>
+                    <div class="terminal-box" id="system-terminal">
+                        <!-- Simulated logs -->
+                        <div class="terminal-line"><span class="terminal-time">[17:43:01]</span> <span
+                                class="terminal-tag tag-info">[CORE]</span> Initializing AINEON Hybrid Engine...</div>
+                        <div class="terminal-line"><span class="terminal-time">[17:43:02]</span> <span
+                                class="terminal-tag tag-success">[WEB3]</span> Connected to Alchemy Ethereum RPC</div>
+                        <div class="terminal-line"><span class="terminal-time">[17:43:05]</span> <span
+                                class="terminal-tag tag-engine">[MEV]</span> Scanning UniswapV3 Pools for price
+                            deltas...</div>
+                    </div>
+                    <div class="p-2 border-t border-border flex gap-2">
+                        <span class="text-primary px-2 py-1 mono text-xs">$</span>
+                        <input type="text" id="terminal-input" placeholder="Enter system command..."
+                            class="flex-1 bg-transparent border-none outline-none text-xs mono text-green-400">
+                    </div>
+                </div>
+
+                <div class="panel col-span-5 metric-cell justify-between">
+                    <div>
+                        <div class="metric-label">MEV Opportunity Map</div>
+                        <div class="mt-4 space-y-3">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex justify-between text-[10px] font-bold uppercase">
+                                    <span class="text-secondary">Flash Loan Arbitrage</span>
+                                    <span>72% Confidence</span>
+                                </div>
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-secondary h-full" style="width: 72%"></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex justify-between text-[10px] font-bold uppercase">
+                                    <span class="text-accent">Sandwich Strategy</span>
+                                    <span>14% Confidence</span>
+                                </div>
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-accent h-full" style="width: 14%"></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex justify-between text-[10px] font-bold uppercase">
+                                    <span class="text-primary">Direct LP Swap</span>
+                                    <span>89% Confidence</span>
+                                </div>
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-primary h-full" style="width: 89%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div style="margin-top: 1.5rem;">
-                        <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">Threshold (Auto) / Amount (Manual)</label>
-                        <input type="number" style="width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary); padding: 0.75rem; border-radius: 6px;" placeholder="Enter amount in ETH" value="5.0">
-                    </div>
-                    
-                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
-                        <button style="flex: 1; background: var(--gradient-primary); color: var(--bg-primary); padding: 0.75rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirm & Execute</button>
-                        <button style="flex: 1; background: var(--bg-tertiary); color: var(--text-primary); padding: 0.75rem; border: 1px solid var(--border-primary); border-radius: 6px; font-weight: 600; cursor: pointer;">View History</button>
+                    <div class="pt-4 border-t border-border mt-4 flex justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-gray-500 uppercase font-bold">Active Bots</span>
+                            <span class="text-sm font-bold">14 / 15</span>
+                        </div>
+                        <button
+                            class="bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/20 px-4 py-1.5 rounded text-[10px] font-bold transition-all">
+                            OPTIMIZE CHANNELS
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Footer Meta -->
+            <footer class="mt-auto border-t border-border p-4 bg-panel flex justify-between items-center">
+                <div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase">
+                    &copy; 2025 AINEON ENTERPRISE PROTOCOL | S.R.L. REGISTERED
+                </div>
+                <div class="flex gap-6 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <span class="flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> API STATUS: 9ms
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> CORE: v1.0.4-STABLE
+                    </span>
+                </div>
+            </footer>
+        </main>
     </div>
-    
+
+    <!-- Initialization Script -->
     <script>
-        // Initialize Charts
-        function initializeCharts() {
-            // Profit Chart
-            const profitCtx = document.getElementById('profitChart').getContext('2d');
-            new Chart(profitCtx, {
+        const API_URL = '/api/profit';
+        let mainChart = null;
+
+        function initCharts() {
+            const ctx = document.getElementById('velocityChart').getContext('2d');
+            mainChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
                     datasets: [{
-                        label: 'Profit ($)',
-                        data: [125000, 128000, 131000, 134000, 136000, 135200, 137500],
+                        label: 'Profit Delta',
+                        data: Array.from({ length: 24 }, () => Math.random() * 0.1),
                         borderColor: '#00ff88',
-                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        borderWidth: 2,
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        pointRadius: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#b0b3c1' } }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { color: '#b0b3c1' } },
-                        y: { ticks: { color: '#b0b3c1' } }
-                    }
-                }
-            });
-            
-            // MEV Chart
-            const mevCtx = document.getElementById('mevChart').getContext('2d');
-            new Chart(mevCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Flash Loans', 'Arbitrage', 'Liquidation', 'Sandwich'],
-                    datasets: [{
-                        data: [42.3, 28.7, 18.9, 10.1],
-                        backgroundColor: ['#00ff88', '#00d4ff', '#0099ff', '#9966ff']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#b0b3c1' } }
-                    }
-                }
-            });
-            
-            // AI Chart
-            const aiCtx = document.getElementById('aiChart').getContext('2d');
-            new Chart(aiCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Day 1', 'Day 5', 'Day 10', 'Day 15', 'Day 20', 'Day 25', 'Day 30'],
-                    datasets: [{
-                        label: 'Learning Progress (%)',
-                        data: [45, 58, 67, 74, 79, 84, 87.3],
-                        borderColor: '#9966ff',
-                        backgroundColor: 'rgba(153, 102, 255, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#b0b3c1' } }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#b0b3c1' } },
-                        y: { ticks: { color: '#b0b3c1' }, min: 0, max: 100 }
-                    }
-                }
-            });
-            
-            // Latency Chart
-            const latencyCtx = document.getElementById('latencyChart').getContext('2d');
-            new Chart(latencyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Engine A', 'Engine B', 'Engine C', 'Engine D'],
-                    datasets: [{
-                        label: 'Latency (ms)',
-                        data: [7.8, 8.9, 6.2, 9.1],
-                        backgroundColor: ['#00ff88', '#00d4ff', '#0099ff', '#9966ff']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#b0b3c1' } }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#b0b3c1' } },
-                        y: { ticks: { color: '#b0b3c1' }, beginAtZero: true }
+                        x: { grid: { display: false }, ticks: { color: '#444', font: { size: 10 } } },
+                        y: { grid: { color: '#111' }, ticks: { color: '#444', font: { size: 10 } } }
                     }
                 }
             });
         }
-        
-        // AI Terminal functionality
-        document.getElementById('aiInput')?.addEventListener('keypress', (e) => {
+
+        async function updateDashboard() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                // Update Metrics
+                document.getElementById('val-total-profit').textContent = `${data.total_profit_eth.toFixed(4)} ETH`;
+                document.getElementById('val-total-profit-usd').textContent = `$${data.total_profit_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
+                document.getElementById('val-daily-profit').textContent = `${data.daily_profit.toFixed(2)} ETH`;
+
+                // Update Table
+                const tableBody = document.getElementById('tx-table-body');
+                if (data.verified_transactions && data.verified_transactions.length > 0) {
+                    tableBody.innerHTML = data.verified_transactions.map(tx => `
+                        <tr>
+                            <td class="mono text-secondary"><a href="${tx.etherscan_link}" target="_blank" class="hover:underline">${tx.tx_hash.substring(0, 10)}...</a></td>
+                            <td class="mono text-gray-400">${tx.block_number}</td>
+                            <td class="mono font-bold text-primary">+${tx.profit_eth.toFixed(4)}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Push to Terminal
+                if (data.verified_transactions && data.verified_transactions.length > 0) {
+                    const latestTx = data.verified_transactions[data.verified_transactions.length - 1];
+                    addLog(`NEW BLOCK CONFIRMATION: Mined Profit +${latestTx.profit_eth} ETH in Block ${latestTx.block_number}`, 'success');
+                }
+
+            } catch (err) {
+                console.error("Dashboard Sync Error:", err);
+            }
+        }
+
+        function addLog(msg, type = 'info') {
+            const terminal = document.getElementById('system-terminal');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            const time = new Date().toLocaleTimeString();
+            const tagClass = `tag-${type}`;
+            line.innerHTML = `<span class="terminal-time">[${time}]</span> <span class="terminal-tag ${tagClass}">[${type.toUpperCase()}]</span> ${msg}`;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Handle Terminal Input
+        document.getElementById('terminal-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                const message = e.target.value;
-                const terminal = document.getElementById('aiTerminal');
-                const line = document.createElement('div');
-                line.className = 'ai-terminal-line';
-                line.textContent = `[${new Date().toLocaleTimeString()}] 👤 You: ${message}`;
-                terminal.appendChild(line);
-                
-                // Simulate AI response
-                setTimeout(() => {
-                    const aiLine = document.createElement('div');
-                    aiLine.className = 'ai-terminal-line';
-                    aiLine.textContent = `[${new Date().toLocaleTimeString()}] 🤖 AI: Processing your request...`;
-                    terminal.appendChild(aiLine);
-                    terminal.scrollTop = terminal.scrollHeight;
-                }, 500);
-                
+                const cmd = e.target.value;
+                addLog(`Executing local command: ${cmd}`, 'engine');
                 e.target.value = '';
-                terminal.scrollTop = terminal.scrollHeight;
+
+                if (cmd.toLowerCase() === 'optimize') {
+                    setTimeout(() => addLog("Optimization complete. Mempool priority adjusted.", "success"), 1000);
+                }
             }
         });
-        
-        // Initialize on load
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            initializeCharts();
-            console.log('🚀 AINEON Hybrid Enterprise Dashboard initialized');
+            initCharts();
+            updateDashboard();
+            setInterval(updateDashboard, 5000);
+
+            // Dummy updates for UX
+            setInterval(() => {
+                document.getElementById('gas-price-display').textContent = `${Math.floor(25 + Math.random() * 10)} Gwei`;
+                document.getElementById('block-number-display').textContent = 18845000 + Math.floor(Math.random() * 1000);
+            }, 3000);
+
+            console.log("AINEON Cockpit v1.0 Initialized Successfully");
         });
     </script>
 </body>
+
 </html>

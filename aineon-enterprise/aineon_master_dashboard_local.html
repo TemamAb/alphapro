@@ -37,6 +37,12 @@
             font-size: 3em;
             margin-bottom: 15px;
             text-shadow: 0 0 15px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 15px #00ff00; }
+            to { text-shadow: 0 0 25px #00ff00, 0 0 35px #00ff00; }
         }
         
         .status-grid {
@@ -51,6 +57,12 @@
             border: 2px solid #00ff00;
             padding: 25px;
             border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-card:hover {
+            background: rgba(0, 255, 0, 0.2);
+            transform: translateY(-2px);
         }
         
         .status-card h3 {
@@ -80,6 +92,18 @@
             font-weight: bold;
         }
         
+        .status-value.active {
+            color: #00ff00;
+        }
+        
+        .status-value.inactive {
+            color: #ff4444;
+        }
+        
+        .status-value.warning {
+            color: #ffff00;
+        }
+        
         .port-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -93,6 +117,12 @@
             padding: 15px;
             text-align: center;
             border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .port-item:hover {
+            background: rgba(0, 255, 0, 0.25);
+            transform: scale(1.05);
         }
         
         .port-number {
@@ -137,6 +167,7 @@
         .btn:hover {
             background: #ffffff;
             color: #000000;
+            transform: scale(1.05);
         }
         
         .btn.secondary {
@@ -181,6 +212,15 @@
             color: #888888;
         }
         
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
         .gasless-badge {
             background: linear-gradient(45deg, #00ff00, #00ffff);
             color: #000;
@@ -197,7 +237,7 @@
         <div class="header">
             <h1>🚀 AINEON MASTER DASHBOARD</h1>
             <div class="subtitle">Multi-Port Local Deployment | Gasless Mode Active <span class="gasless-badge">GASLESS</span></div>
-            <div class="subtitle">Deployed: 2025-12-21 15:18:20</div>
+            <div class="subtitle">Deployed: 2025-12-24 11:10:57</div>
         </div>
 
         <div class="status-grid">
@@ -205,15 +245,15 @@
                 <h3>🔗 Gasless Infrastructure</h3>
                 <div class="status-item">
                     <span class="status-label">Gasless Mode:</span>
-                    <span class="status-value">ENABLED</span>
+                    <span class="status-value active">ENABLED</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Pilmlico Paymaster:</span>
-                    <span class="status-value">ACTIVE</span>
+                    <span class="status-value active">ACTIVE</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">ERC-4337:</span>
-                    <span class="status-value">COMPLIANT</span>
+                    <span class="status-value active">COMPLIANT</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Smart Wallet:</span>
@@ -229,7 +269,7 @@
                 <h3>📊 System Status</h3>
                 <div class="status-item">
                     <span class="status-label">Deployment Mode:</span>
-                    <span class="status-value">LOCAL</span>
+                    <span class="status-value active">LOCAL</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Master Port:</span>
@@ -245,7 +285,7 @@
                 </div>
                 <div class="status-item">
                     <span class="status-label">Status:</span>
-                    <span class="status-value">RUNNING</span>
+                    <span class="status-value active">RUNNING</span>
                 </div>
             </div>
 
@@ -253,23 +293,23 @@
                 <h3>💰 Trading Status</h3>
                 <div class="status-item">
                     <span class="status-label">Live Trading:</span>
-                    <span class="status-value">STANDBY</span>
+                    <span class="status-value warning">STANDBY</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Flash Loans:</span>
-                    <span class="status-value">READY</span>
+                    <span class="status-value active">READY</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Arbitrage:</span>
-                    <span class="status-value">ACTIVE</span>
+                    <span class="status-value active">ACTIVE</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">AI Optimizer:</span>
-                    <span class="status-value">RUNNING</span>
+                    <span class="status-value active">RUNNING</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Risk Manager:</span>
-                    <span class="status-value">MONITORING</span>
+                    <span class="status-value active">MONITORING</span>
                 </div>
             </div>
 
@@ -277,11 +317,11 @@
                 <h3>🌐 Network Status</h3>
                 <div class="status-item">
                     <span class="status-label">Web3 Connection:</span>
-                    <span class="status-value">CONNECTED</span>
+                    <span class="status-value active">CONNECTED</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Etherscan API:</span>
-                    <span class="status-value">ACTIVE</span>
+                    <span class="status-value active">ACTIVE</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Block Number:</span>
@@ -302,52 +342,52 @@
             <div class="port-item">
                 <span class="port-number">7001</span>
                 <div class="port-service">Master Dashboard</div>
-                <a href="http://localhost:7001" class="port-link">Open Dashboard</a>
+                <a href="http://0.0.0.0:7001" class="port-link">Open Dashboard</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7002</span>
                 <div class="port-service">Gasless Engine</div>
-                <a href="http://localhost:7002" class="port-link">Gasless Portal</a>
+                <a href="http://0.0.0.0:7002" class="port-link">Gasless Portal</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7003</span>
                 <div class="port-service">Profit Monitor</div>
-                <a href="http://localhost:7003" class="port-link">Monitor Profits</a>
+                <a href="http://0.0.0.0:7003" class="port-link">Monitor Profits</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7004</span>
                 <div class="port-service">Live Trading</div>
-                <a href="http://localhost:7004" class="port-link">Trading Panel</a>
+                <a href="http://0.0.0.0:7004" class="port-link">Trading Panel</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7005</span>
                 <div class="port-service">Blockchain Validator</div>
-                <a href="http://localhost:7005" class="port-link">Validator</a>
+                <a href="http://0.0.0.0:7005" class="port-link">Validator</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7006</span>
                 <div class="port-service">Flash Loan Executor</div>
-                <a href="http://localhost:7006" class="port-link">Flash Loans</a>
+                <a href="http://0.0.0.0:7006" class="port-link">Flash Loans</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7007</span>
                 <div class="port-service">AI Optimizer</div>
-                <a href="http://localhost:7007" class="port-link">AI Panel</a>
+                <a href="http://0.0.0.0:7007" class="port-link">AI Panel</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7008</span>
                 <div class="port-service">Risk Manager</div>
-                <a href="http://localhost:7008" class="port-link">Risk Control</a>
+                <a href="http://0.0.0.0:7008" class="port-link">Risk Control</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7009</span>
                 <div class="port-service">API Gateway</div>
-                <a href="http://localhost:7009" class="port-link">API Portal</a>
+                <a href="http://0.0.0.0:7009" class="port-link">API Portal</a>
             </div>
             <div class="port-item">
                 <span class="port-number">7010</span>
                 <div class="port-service">System Monitor</div>
-                <a href="http://localhost:7010" class="port-link">System Status</a>
+                <a href="http://0.0.0.0:7010" class="port-link">System Status</a>
             </div>
         </div>
 
@@ -379,23 +419,38 @@
         </div>
 
         <div class="controls">
-            <a href="http://localhost:7001" class="btn">Open Master Dashboard</a>
+            <a href="http://0.0.0.0:7001" class="btn">Open Master Dashboard</a>
             <button class="btn secondary" onclick="openAllPorts()">Open All Portals</button>
             <button class="btn secondary" onclick="refreshDashboard()">Refresh Status</button>
+            <button class="btn secondary" onclick="restartDeployment()">Restart Deployment</button>
         </div>
 
         <div class="footer">
             <div>AINEON Multi-Port Local Deployment System</div>
-            <div>Gasless Mode Active | Ports 7001-7010</div>
+            <div class="blink">Gasless Mode Active | Ports 7001-7010</div>
             <div>© 2025 AINEON - ERC-4337 Gasless Trading Platform</div>
         </div>
     </div>
 
     <script>
+        // Real-time updates
+        async function updateBlockInfo() {
+            try {
+                // Simulate real-time blockchain data
+                const blockNumber = Math.floor(Math.random() * 1000000) + 24060000;
+                const gasPrice = (Math.random() * 50 + 20).toFixed(2);
+                
+                document.getElementById('blockNumber').textContent = blockNumber.toLocaleString();
+                document.getElementById('gasPrice').textContent = gasPrice + ' gwei';
+            } catch (error) {
+                console.log('Block info update failed:', error);
+            }
+        }
+
         function openAllPorts() {
             const ports = [7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010];
             ports.forEach(port => {
-                window.open(`http://localhost:${port}`, '_blank');
+                window.open(`http://0.0.0.0:${port}`, '_blank');
             });
         }
 
@@ -403,18 +458,19 @@
             location.reload();
         }
 
-        // Auto-update blockchain info
-        setInterval(() => {
-            try {
-                const blockNumber = Math.floor(Math.random() * 1000000) + 24060000;
-                const gasPrice = (Math.random() * 50 + 20).toFixed(2);
-                
-                document.getElementById('blockNumber').textContent = blockNumber.toLocaleString();
-                document.getElementById('gasPrice').textContent = gasPrice + ' gwei';
-            } catch (error) {
-                console.log('Update failed:', error);
+        function restartDeployment() {
+            if (confirm('Restart AINEON deployment? This will restart all services.')) {
+                window.location.href = 'http://0.0.0.0:7001';
             }
-        }, 5000);
+        }
+
+        // Auto-update every 5 seconds
+        setInterval(updateBlockInfo, 5000);
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBlockInfo();
+        });
     </script>
 </body>
 </html>

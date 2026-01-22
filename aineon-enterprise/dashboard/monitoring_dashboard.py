@@ -20,7 +20,7 @@ class MonitoringDashboard:
         self.performance_metrics = {}
         self.risk_metrics = {}
         self.websocket_url = "ws://localhost:8765"  # For real-time updates
-        self.api_base_url = os.getenv("API_BASE_URL", "http://localhost:8081")
+        self.api_base_url = os.getenv("API_BASE_URL", "http://localhost:10000")
 
     def run_dashboard(self):
         """Run the Streamlit dashboard"""

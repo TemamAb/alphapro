@@ -83,7 +83,7 @@ class EliteWithdrawalDashboard:
     """Elite-tier withdrawal dashboard management"""
     
     def __init__(self):
-        self.api_base_url = "http://localhost:8081"
+        self.api_base_url = "http://localhost:10000"
         self.refresh_interval = 5  # seconds
         
     def fetch_withdrawal_data(self) -> Dict:

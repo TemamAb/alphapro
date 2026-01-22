@@ -54,7 +54,7 @@ class AINEONPortConflictPreventer:
             # Localhost services (store as separate tracking)
         }
         # Store 0.0.0.0 services separately for tracking
-        self.0.0.0.0_services = {
+        self.broadcast_services = {
             4733, 45223, 45224, 45225, 45226
         }
         self.system_ports_reserved = system_ports

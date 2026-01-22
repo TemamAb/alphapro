@@ -1,24 +1,111 @@
 {
-  "mode": "MANUAL_ONLY",
-  "auto_transfer_enabled": false,
-  "transfer_mode": "MANUAL",
-  "profit_threshold_eth": 5.0,
-  "min_profit_per_trade": 0.5,
-  "max_withdrawal_per_tx": "unlimited",
-  "requires_confirmation": true,
-  "notification_on_ready": true,
-  "ready_threshold_eth": 5.0,
-  "gas_price_optimization": true,
-  "destination_wallet": "COLD_STORAGE_OR_SPECIFIED",
-  "gasless_withdrawal": {
-    "enabled": true,
-    "erc4337_mode": true,
-    "pilmlico_sponsorship": true
+  "rpc_url": "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
+  "chain_id": 1,
+  "gas_reserve_eth": 0.1,
+  "max_retry_attempts": 3,
+  "retry_delay_seconds": 60,
+  "monitoring_interval": 30,
+  "alert_thresholds": {
+    "max_pending_withdrawals": 5,
+    "max_failed_withdrawals": 3,
+    "min_wallet_balance": 0.5
   },
-  "approval_levels": {
-    "threshold_5_eth": "auto_notification",
-    "threshold_20_eth": "manager_approval",
-    "threshold_50_eth": "executive_approval",
-    "threshold_100_eth": "multi_level_approval"
+  "security": {
+    "max_daily_withdrawal": 100.0,
+    "max_single_withdrawal": 10.0,
+    "require_2fa": true
+  },
+  "wallet_address": "0x742d35Cc6634C0532925a3b844Bc9e98D3E9c6b3",
+  "private_key": "YOUR_ENCRYPTED_PRIVATE_KEY_HERE",
+  "contracts": {
+    "AaveV3": {
+      "address": "0x87870Bcd2C8d8aADE3d8C4D8C8D8C8D8C8D8C8D8",
+      "version": "3.0.1",
+      "last_verified": "2024-12-24T08:00:00Z",
+      "is_active": true,
+      "abi": [
+        {
+          "inputs": [
+            {"internalType": "address", "name": "asset", "type": "address"},
+            {"internalType": "uint256", "name": "amount", "type": "uint256"},
+            {"internalType": "address", "name": "to", "type": "address"},
+            {"internalType": "uint256", "name": "deadline", "type": "uint256"},
+            {"internalType": "uint8", "name": "permitV", "type": "uint8"},
+            {"internalType": "bytes32", "name": "permitR", "type": "bytes32"},
+            {"internalType": "bytes32", "name": "permitS", "type": "bytes32"}
+          ],
+          "name": "flashLoan",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    "UniswapV3": {
+      "address": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+      "version": "1.0.0",
+      "last_verified": "2024-12-24T08:00:00Z",
+      "is_active": true,
+      "abi": []
+    }
+  },
+  "addresses": [
+    {
+      "address": "0xA51E466e659Cf9DdD5a5CA9ECDd8392302102490",
+      "label": "Primary Profit Wallet",
+      "percentage": 100.0,
+      "priority": 1,
+      "enabled": true,
+      "last_used": null,
+      "total_withdrawn": "0"
+    }
+  ],
+  "rules": [
+    {
+      "id": "auto_withdrawal_high_balance",
+      "name": "High Balance Auto-Withdrawal",
+      "threshold_eth": "5.0",
+      "gas_strategy": "optimized",
+      "max_frequency_hours": 24,
+      "enabled": true,
+      "last_triggered": null,
+      "trigger_count": 0
+    },
+    {
+      "id": "auto_withdrawal_medium_balance",
+      "name": "Medium Balance Auto-Withdrawal",
+      "threshold_eth": "2.0",
+      "gas_strategy": "standard",
+      "max_frequency_hours": 12,
+      "enabled": true,
+      "last_triggered": null,
+      "trigger_count": 0
+    }
+  ],
+  "monitoring": {
+    "enabled": true,
+    "alert_email": "alerts@aineon.enterprise",
+    "slack_webhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "log_level": "INFO",
+    "metrics_retention_days": 90
+  },
+  "compliance": {
+    "kyc_required": true,
+    "max_withdrawal_per_user_daily": 50.0,
+    "geographic_restrictions": [],
+    "sanctions_screening": true,
+    "transaction_monitoring": true
+  },
+  "gas_optimization": {
+    "dynamic_pricing": true,
+    "max_gas_price_gwei": 100,
+    "min_gas_price_gwei": 10,
+    "gas_price_multiplier": 1.2
+  },
+  "emergency_procedures": {
+    "enabled": true,
+    "emergency_contacts": ["security@aineon.enterprise"],
+    "auto_emergency_withdrawal": false,
+    "emergency_gas_multiplier": 2.0
   }
 }

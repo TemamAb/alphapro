@@ -16,6 +16,11 @@ import json
 from datetime import datetime
 import webbrowser
 
+# Fix Windows encoding issues
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 class AineonMultiPortDeployer:
     """
     AINEON MULTI-PORT LOCAL DEPLOYMENT SYSTEM

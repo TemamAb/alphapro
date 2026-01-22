@@ -26,7 +26,7 @@ sys.path.append('..')
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uvicorn
@@ -980,22 +980,28 @@ async def accumulate_profits():
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     """Handle HTTP exceptions"""
-    return {
-        "error": "HTTP Exception",
-        "detail": exc.detail,
-        "status_code": exc.status_code,
-        "timestamp": datetime.now().isoformat()
-    }
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": "HTTP Exception",
+            "detail": exc.detail,
+            "status_code": exc.status_code,
+            "timestamp": datetime.now().isoformat()
+        }
+    )
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
     """Handle general exceptions"""
     logger.error(f"Unhandled exception: {exc}")
-    return {
-        "error": "Internal Server Error",
-        "detail": "An unexpected error occurred",
-        "timestamp": datetime.now().isoformat()
-    }
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error",
+            "detail": "An unexpected error occurred",
+            "timestamp": datetime.now().isoformat()
+        }
+    )
 
 if __name__ == "__main__":
     # Run the API server
