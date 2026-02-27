@@ -6,7 +6,7 @@ module "pimlico-api-secret" {
   source      = "github.com/GoogleCloudPlatform/terraform-google-secret-manager//modules/simple-secret?ref=v0.9.0"
   project_id  = "alpha-orion"
   name        = "pimlico-api-key"
-  secret_data = "pim_TDJjCjeAJdArjep3usKXTu"
+  secret_data = var.pimlico_api_key
   automatic_replication = {
     kms_key_name = "projects/alpha-orion/locations/us-central1/keyRings/flash-loan-keyring/cryptoKeys/flash-loan-key"
   }
@@ -44,7 +44,7 @@ module "db-secret" {
   source      = "github.com/GoogleCloudPlatform/terraform-google-secret-manager//modules/simple-secret?ref=v0.9.0"
   project_id  = "alpha-orion"
   name        = "db-credentials"
-  secret_data = "YOUR_GENERATED_DB_PASSWORD_HERE"
+  secret_data = var.db_password
   automatic_replication = {
     kms_key_name = "projects/alpha-orion/locations/us-central1/keyRings/flash-loan-keyring/cryptoKeys/flash-loan-key"
   }
@@ -229,7 +229,7 @@ module "withdrawal-wallet-secret" {
   source      = "github.com/GoogleCloudPlatform/terraform-google-secret-manager//modules/simple-secret?ref=v0.9.0"
   project_id  = "alpha-orion"
   name        = "withdrawal-wallet-keys"
-  secret_data = "YOUR_WITHDRAWAL_WALLET_KEYS_HERE"
+  secret_data = var.withdrawal_wallet_keys
   automatic_replication = {
     kms_key_name = "projects/alpha-orion/locations/us-central1/keyRings/flash-loan-keyring/cryptoKeys/flash-loan-key"
   }
@@ -376,7 +376,7 @@ module "pimlico-api-secret-eu" {
   source      = "github.com/GoogleCloudPlatform/terraform-google-secret-manager//modules/simple-secret?ref=v0.9.0"
   project_id  = "alpha-orion"
   name        = "pimlico-api-key-eu"
-  secret_data = "pim_TDJjCjeAJdArjep3usKXTu"
+  secret_data = var.pimlico_api_key_eu
   automatic_replication = {
     kms_key_name = "projects/alpha-orion/locations/europe-west1/keyRings/flash-loan-keyring-eu/cryptoKeys/flash-loan-key-eu"
   }
@@ -386,7 +386,7 @@ module "db-secret-eu" {
   source      = "github.com/GoogleCloudPlatform/terraform-google-secret-manager//modules/simple-secret?ref=v0.9.0"
   project_id  = "alpha-orion"
   name        = "db-credentials-eu"
-  secret_data = "YOUR_GENERATED_DB_PASSWORD_HERE_EU"
+  secret_data = var.db_password_eu
   automatic_replication = {
     kms_key_name = "projects/alpha-orion/locations/europe-west1/keyRings/flash-loan-keyring-eu/cryptoKeys/flash-loan-key-eu"
   }
@@ -396,7 +396,7 @@ module "withdrawal-wallet-secret-eu" {
   source      = "github.com/GoogleCloudPlatform/terraform-google-secret-manager//modules/simple-secret?ref=v0.9.0"
   project_id  = "alpha-orion"
   name        = "withdrawal-wallet-keys-eu"
-  secret_data = "YOUR_WITHDRAWAL_WALLET_KEYS_HERE_EU"
+  secret_data = var.withdrawal_wallet_keys_eu
   automatic_replication = {
     kms_key_name = "projects/alpha-orion/locations/europe-west1/keyRings/flash-loan-keyring-eu/cryptoKeys/flash-loan-key-eu"
   }
@@ -731,7 +731,7 @@ module "alloydb-primary-us" {
   cluster_id = "flash-loan-db-us"
   location   = "us-central1"
   cluster_initial_user = {
-    password = "YOUR_ALLOYDB_PASSWORD_HERE"
+    password = var.alloydb_password
   }
   cluster_encryption_key_name = "projects/alpha-orion/locations/us-central1/keyRings/flash-loan-keyring/cryptoKeys/flash-loan-key"
   automated_backup_policy = {

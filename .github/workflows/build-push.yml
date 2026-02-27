@@ -17,7 +17,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [scanner, orchestrator, executor, backend, frontend]
+        service: 
+          - eye-scanner
+          - brain-orchestrator
+          - flash-loan-executor
+          - user-api-service
+          - withdrawal-service
+          - ai-agent-service
+          - ai-optimizer
+          - benchmarking-scraper-service
+          - brain-ai-optimization-orchestrator
+          - brain-risk-management
+          - brain-simulation
+          - brain-strategy-engine
+          - dataflow-cep
+          - dataflow-market-data-ingestion
+          - hand-blockchain-proxy
+          - hand-smart-order-router
+          - order-management-service
+
 
     steps:
       - name: Checkout
@@ -38,11 +56,26 @@ jobs:
           username: _json_key
           password: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Check service directory exists
+        id: check-dir
+        run: |
+          if [ -d "./backend-services/services/${{ matrix.service }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "path=./backend-services/services/${{ matrix.service }}" >> $GITHUB_OUTPUT
+          elif [ -d "./${{ matrix.service }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "path=./${{ matrix.service }}" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️  Directory for ${{ matrix.service }} not found, skipping build"
+          fi
+
       - name: Build and Push
+        if: steps.check-dir.outputs.exists == 'true'
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.service }}
-          push: true
+          context: ${{ steps.check-dir.outputs.path }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ matrix.service }}:${{ github.sha }}
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ matrix.service }}:latest

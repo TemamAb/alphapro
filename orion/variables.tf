@@ -18,3 +18,42 @@ variable "apphub_application_id" {
   description = "The AppHub application identifier"
   type = string
 }
+
+# Secret variables - DO NOT commit actual values to version control
+# These should be provided via environment variables or secure secret management
+
+variable "pimlico_api_key" {
+  description = "Pimlico API key for US region"
+  type = string
+  sensitive = true
+}
+
+variable "pimlico_api_key_eu" {
+  description = "Pimlico API key for EU region"
+  type = string
+  sensitive = true
+}
+
+variable "db_password" {
+  description = "Database password for US region"
+  type = string
+  sensitive = true
+}
+
+variable "db_password_eu" {
+  description = "Database password for EU region"
+  type = string
+  sensitive = true
+}
+
+variable "withdrawal_wallet_keys" {
+  description = "Withdrawal wallet keys for US region"
+  type = string
+  sensitive = true
+}
+
+variable "withdrawal_wallet_keys_eu" {
+  description = "Withdrawal wallet keys for EU region"
+  type = string
+  sensitive = true
+}

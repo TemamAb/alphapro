@@ -1,4 +1,4 @@
-﻿# Dependencies
+﻿﻿# Dependencies
 node_modules/
 __pycache__/
 *.py[cod]
@@ -28,3 +28,8 @@ build/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Temporary/Helper Scripts
+fix-github-auth.bat
+*.tmp
+*.temp
