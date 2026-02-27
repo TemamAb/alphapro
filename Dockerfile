@@ -172,7 +172,7 @@ echo ""
 exec python3 core/main.py
 EOF
 
-chmod +x /app/start.sh
+RUN chmod +x /app/start.sh
 
 # ============================================================================
 # FINAL SETUP
