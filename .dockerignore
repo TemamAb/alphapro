@@ -17,3 +17,6 @@ Dockerfile*
 *.env
 .env
 .env.*
+
+# keep example for builds
+!.env.example
