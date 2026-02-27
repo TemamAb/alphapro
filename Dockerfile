@@ -18,4 +18,4 @@ COPY backend-services/services/brain-ai-optimization-orchestrator/ /app/
 
 EXPOSE 8080
 
-CMD ["gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "src.app:app"]
+CMD ["gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "main:app"]
