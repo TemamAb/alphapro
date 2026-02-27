@@ -14,6 +14,8 @@ jobs:
   build-push:
     name: Build ${{ matrix.service }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -74,7 +76,8 @@ jobs:
         if: steps.check-dir.outputs.exists == 'true'
         uses: docker/build-push-action@v5
         with:
-          context: ${{ steps.check-dir.outputs.path }}
+          context: .
+          file: ${{ steps.check-dir.outputs.path }}/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ matrix.service }}:${{ github.sha }}
