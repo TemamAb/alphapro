@@ -5,6 +5,14 @@ import random
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({
+        'service': 'Brain AI Optimization Orchestrator',
+        'status': 'Operational',
+        'version': '1.0.0'
+    })
+
 @app.route('/orchestrate', methods=['GET'])
 def orchestrate():
     # Mock AI optimization orchestration
