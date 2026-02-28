@@ -1,0 +1,37 @@
+name: Weekly Strategy Backtest
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Run at midnight every Sunday
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy psycopg2-binary
+
+      - name: Run Backtest Strategy
+        env:
+          # In a real scenario, use a read-replica URL or a dedicated analytics DB
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python backend-services/services/user-api-service/src/backtest_strategy.py > backtest_report.txt
+          cat backtest_report.txt
+
+      - name: Upload Backtest Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: weekly-backtest-report
+          path: backtest_report.txt

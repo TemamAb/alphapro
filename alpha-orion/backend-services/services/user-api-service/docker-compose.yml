@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # User API Service (Node.js)
+  user-api-service:
+    build:
+      context: .
+      dockerfile: backend-services/services/user-api-service/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/alpha_orion
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - alpha-orion-net
+
+  # Dashboard (React)
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+    depends_on:
+      - user-api-service
+    networks:
+      - alpha-orion-net
+
+  # Backtesting Service (Python)
+  backtesting-service:
+    build:
+      context: .
+      dockerfile: backend-services/services/backtesting/Dockerfile
+    ports:
+      - "8007:8007"
+    environment:
+      - PORT=8007
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - alpha-orion-net
+
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=alpha_orion
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - alpha-orion-net
+
+  # Cache
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - alpha-orion-net
+
+networks:
+  alpha-orion-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

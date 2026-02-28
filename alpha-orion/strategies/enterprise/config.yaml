@@ -1,0 +1,112 @@
+# Alpha-Orion Enterprise Strategies Configuration
+
+# Strategy enable/disable flags
+strategies:
+  # Game Changer Strategies (Elite/Institutional Level)
+  lvr_rebalancing:
+    enabled: true
+    risk_level: LOW
+    complexity: ELITE
+    min_profit_threshold: 0.001
+    max_execution_time: 30000
+
+  oracle_latency:
+    enabled: true
+    risk_level: MEDIUM
+    complexity: ELITE
+    min_profit_threshold: 0.001
+    latency_threshold_bps: 15
+
+  jit_liquidity:
+    enabled: true
+    risk_level: HIGH
+    complexity: INSTITUTIONAL_ALPHA
+    min_profit_threshold: 0.001
+    min_whale_size_eth: 100
+
+  # Core Arbitrage Strategies
+  triangular_arbitrage:
+    enabled: true
+    risk_level: MEDIUM
+    complexity: HIGH
+    min_profit_threshold: 0.001
+
+  cross_dex_arbitrage:
+    enabled: true
+    risk_level: MEDIUM
+    complexity: MEDIUM
+    min_profit_threshold: 0.001
+
+  cross_chain_arbitrage:
+    enabled: true
+    risk_level: HIGH
+    complexity: VERY_HIGH
+    min_profit_threshold: 0.002
+
+  liquidity_pool_arbitrage:
+    enabled: true
+    risk_level: MEDIUM
+    complexity: HIGH
+    min_profit_threshold: 0.001
+
+  mev_extraction:
+    enabled: true
+    risk_level: HIGH
+    complexity: VERY_HIGH
+    min_profit_threshold: 0.001
+
+  statistical_arbitrage:
+    enabled: true
+    risk_level: MEDIUM
+    complexity: HIGH
+    min_profit_threshold: 0.001
+
+  order_flow_arbitrage:
+    enabled: true
+    risk_level: MEDIUM
+    complexity: MEDIUM
+    min_profit_threshold: 0.001
+
+# Execution parameters
+execution:
+  max_slippage: 0.003
+  min_profit_threshold_eth: 0.001
+  max_execution_time_ms: 30000
+  gas_price_multiplier: 1.2
+  flash_loan_fee: 0.0009
+  competitive_threshold: 0.001
+
+# Risk management
+risk_management:
+  max_position_size_eth: 100
+  max_daily_loss: 10
+  enable_circuit_breaker: true
+  circuit_breaker_threshold: 0.05
+
+# ML Model settings
+ml_models:
+  enable_prediction: true
+  min_confidence: 0.6
+  drift_threshold: 0.5
+
+# Supported chains
+chains:
+  - ethereum
+  - polygon
+  - arbitrum
+  - optimism
+  - avalanche
+
+# Supported DEXes
+dexes:
+  - uniswap
+  - sushiswap
+  - quickswap
+  - curve
+  - balancer
+
+# Performance settings
+performance:
+  parallel_execution: true
+  max_concurrent_trades: 5
+  opportunity_cache_ttl: 60

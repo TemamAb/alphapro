@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1. The User API Service (Node.js)
+  api:
+    build:
+      context: .
+      dockerfile: backend-services/services/user-api-service/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      # These variables connect the API to the other services in this file.
+      - DATABASE_URL=postgresql://alpha_user:alpha_password@postgres:5432/alpha_db
+      - REDIS_URL=redis://redis:6379
+      - PORT=8080
+      - NODE_ENV=development
+      # Credentials MUST be provided via environment variables - never hardcode in production
+      # Default values provided for local development only
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - USER_USERNAME=${USER_USERNAME:-user}
+      - USER_PASSWORD=${USER_PASSWORD:-user123}
+      - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+    networks:
+      - alpha-orion-net
+
+  # 2. PostgreSQL Database Service
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=alpha_user
+      - POSTGRES_PASSWORD=alpha_password
+      - POSTGRES_DB=alpha_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - alpha-orion-net
+
+  # 3. Redis Cache Service
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - alpha-orion-net
+
+volumes:
+  postgres_data:
+
+networks:
+  alpha-orion-net:

@@ -1,0 +1,129 @@
+# =============================================================================
+# Alpha-Pro Production Dockerfile
+# Multi-stage build for optimized production image
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Stage 1: Dependencies
+# -----------------------------------------------------------------------------
+FROM node:18-alpine AS deps
+WORKDIR /app
+
+# Install dependencies for Node.js services
+COPY backend-services/services/user-api-service/package*.json ./
+RUN npm ci --only=production
+
+# Install Python dependencies for services that need it
+COPY backend-services/services/brain-ai-optimization-orchestrator/src/requirements.txt ./python-requirements.txt
+RUN npm ci --only=production || true
+
+# -----------------------------------------------------------------------------
+# Stage 2: Builder - Build dashboard if exists
+# -----------------------------------------------------------------------------
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Copy package files
+COPY dashboard/package*.json ./dashboard/ 2>/dev/null || true
+
+# Build dashboard if it exists
+WORKDIR /app/dashboard
+RUN if [ -f package.json ]; then npm install --legacy-peer-deps && npm run build; fi
+
+# -----------------------------------------------------------------------------
+# Stage 3: Production Runtime
+# -----------------------------------------------------------------------------
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+# Security: Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nodejs
+
+# Set environment variables for production
+ENV NODE_ENV=production \
+    PORT=8080 \
+    UV_THREADPOOL_SIZE=64 \
+    NODE_OPTIONS="--max-old-space-size=2048"
+
+# Copy Node.js dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy dashboard build
+COPY --from=builder /app/dashboard/dist ./dashboard/dist
+
+# Copy backend service
+COPY backend-services/services/user-api-service/src ./src
+COPY backend-services/services/user-api-service/package*.json ./
+
+# Copy strategies
+COPY strategies/ ./strategies/
+
+# Create production entry point
+RUN cat > /app/entrypoint.sh << 'EOF'
+#!/bin/sh
+set -e
+
+echo "Starting Alpha-Pro Production Service..."
+
+# Verify required environment variables
+required_vars="DATABASE_URL REDIS_URL"
+for var in $required_vars; do
+  if [ -z "${!var}" ]; then
+    echo "ERROR: $var is required but not set"
+    exit 1
+  fi
+done
+
+echo "All required environment variables verified"
+echo "Starting application..."
+
+exec "$@"
+EOF
+
+RUN chmod +x /app/entrypoint.sh
+
+# Health check
+RUN cat > /app/healthcheck.js << 'EOF'
+const http = require('http');
+
+const options = {
+  hostname: 'localhost',
+  port: process.env.PORT || 8080,
+  path: '/api/health',
+  method: 'GET',
+  timeout: 2000
+};
+
+const req = http.request(options, (res) => {
+  if (res.statusCode === 200) {
+    process.exit(0);
+  } else {
+    process.exit(1);
+  }
+});
+
+req.on('error', () => process.exit(1));
+req.on('timeout', () => {
+  req.destroy();
+  process.exit(1);
+});
+
+req.end();
+EOF
+
+# Expose port
+EXPOSE 8080
+
+# Switch to non-root user
+USER nodejs
+
+# Entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node /app/healthcheck.js
+
+# Start the application
+CMD ["node", "src/index.js"]

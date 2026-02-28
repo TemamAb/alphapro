@@ -1,0 +1,67 @@
+name: Load Test
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  k6_load_test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_USER: alpha_user
+          POSTGRES_PASSWORD: alpha_password
+          POSTGRES_DB: alpha_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        working-directory: ./backend-services/services/user-api-service
+        run: npm ci
+
+      - name: Start Application
+        working-directory: ./backend-services/services/user-api-service
+        env:
+          PORT: 8080
+          DATABASE_URL: postgres://alpha_user:alpha_password@localhost:5432/alpha_db
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+          NODE_ENV: test
+        run: |
+          npm start &
+          echo "Waiting for service to start..."
+          sleep 10
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run k6 Load Test
+        run: k6 run tests/load/k6_script.js
+        env:
+          API_URL: http://localhost:8080

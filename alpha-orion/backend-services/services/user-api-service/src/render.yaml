@@ -1,0 +1,43 @@
+services:
+  # 1. Unified Frontend + User API Service (Gateway)
+  - type: web
+    name: alpha-orion-api
+    env: node
+    plan: starter
+    rootDir: .
+    # Build Protocol:
+    # 1. Install & Build Dashboard (Frontend)
+    # 2. Install User API Dependencies (Backend)
+    buildCommand: |
+      cd dashboard && npm install && npm run build && cd ../backend-services/services/user-api-service && npm install
+    # Start Protocol:
+    # Run the Node.js server which serves both API and Static Dashboard files
+    startCommand: cd backend-services/services/user-api-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AI_SERVICE_URL
+        fromService:
+          type: web
+          name: alpha-orion-brain
+          property: url
+      - key: JWT_SECRET
+        generateValue: true
+      - key: WALLET_ADDRESS
+        sync: false
+      - key: PIMLICO_API_KEY
+        sync: false
+
+  # 2. Brain AI Optimization Orchestrator (Python)
+  - type: web
+    name: alpha-orion-brain
+    env: python
+    plan: starter
+    rootDir: backend-services/services/brain-ai-optimization-orchestrator
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn src.app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: OPENAI_API_KEY
+        sync: false

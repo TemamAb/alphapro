@@ -1,0 +1,59 @@
+name: Alpha-Orion CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-user-api-service:
+    runs-on: ubuntu-latest
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    defaults:
+      run:
+        working-directory: ./backend-services/services/user-api-service
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ./backend-services/services/user-api-service/package-lock.json
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Lint Code
+      run: npm run lint
+
+    - name: Run Functional Tests (Mocks)
+      run: npm test
+      env:
+        NODE_ENV: test
+        JWT_SECRET: test-secret
+        DATABASE_URL: postgres://mock:mock@localhost:5432/mock
+        REDIS_URL: redis://mock:6379 # Use a mock URL for unit tests
+        # Mocking keys to prevent startup errors during CI
+        OPENAI_API_KEY: mock-key
+        PRIVATE_KEY: 0x0000000000000000000000000000000000000000000000000000000000000001
+        ETHEREUM_RPC_URL: http://localhost:8545
+
+    - name: Run Integration Tests (Live Redis)
+      run: npm run test:integration
+      env:
+        REDIS_URL: redis://localhost:6379 # Connect to the service container

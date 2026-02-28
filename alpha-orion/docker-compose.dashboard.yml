@@ -1,0 +1,67 @@
+# Alpha-Orion Local Development Docker Compose
+# Use this to verify dockerization before Render deployment
+
+version: '3.8'
+
+services:
+  # ============================================================
+  # Backend API Service
+  # ============================================================
+  backend:
+    image: alpha-orion-backend:latest
+    container_name: alpha-orion-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./strategies:/strategies:ro
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      # Add your API keys here for local testing
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:pass@localhost:5432/alpha}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - redis
+    networks:
+      - alpha-orion-net
+    restart: unless-stopped
+
+  # ============================================================
+  # Dashboard (Vite + React)
+  # ============================================================
+  dashboard:
+    image: alpha-orion-dashboard:latest
+    container_name: alpha-orion-dashboard
+    ports:
+      - "5000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+      - VITE_WS_URL=ws://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - alpha-orion-net
+    restart: unless-stopped
+
+  # ============================================================
+  # Redis Cache
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: alpha-orion-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - alpha-orion-net
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+
+networks:
+  alpha-orion-net:
+    driver: bridge

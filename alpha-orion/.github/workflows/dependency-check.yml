@@ -1,0 +1,31 @@
+name: Dependency Check
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Run every Monday at 8:00 AM UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-outdated:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend-services/services/user-api-service
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          cache-dependency-path: ./backend-services/services/user-api-service/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check for outdated packages
+        # We use '|| true' to ensure the workflow doesn't fail if outdated packages are found,
+        # but the output will be visible in the logs for review.
+        run: npm outdated || true

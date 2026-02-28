@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # Isolated Recovery Database
+  recovery-db:
+    image: postgres:14-alpine
+    container_name: alpha-orion-recovery-db
+    environment:
+      POSTGRES_USER: recovery_user
+      POSTGRES_PASSWORD: recovery_password
+      POSTGRES_DB: alpha_orion_recovery
+    ports:
+      - "5433:5432" # Expose on a different port to avoid conflict with dev db
+    volumes:
+      # Mount the backups directory to the container's init script folder
+      # Any .sql or .sh file here will run on startup
+      - ./backups:/docker-entrypoint-initdb.d
+    networks:
+      - recovery-net
+
+networks:
+  recovery-net:
+    driver: bridge
+
+# Usage:
+# 1. Place your backup file (e.g., backup_latest.sql) in the ./backups folder.
+# 2. Run: docker-compose -f docker-compose.recovery.yml up
+# 3. Connect via: postgres://recovery_user:recovery_password@localhost:5433/alpha_orion_recovery

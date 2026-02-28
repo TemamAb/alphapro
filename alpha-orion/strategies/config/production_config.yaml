@@ -1,0 +1,461 @@
+# Alpha-Orion Production Configuration
+# Complete configuration for all 16 trading strategies
+# Version: 2.0 - February 2026
+
+## Global Settings
+environment: production
+debug: false
+log_level: INFO
+
+## API Endpoints Configuration
+apis:
+  # Blockchain/RPC Endpoints
+  ethereum:
+    rpc_url: ${ETHEREUM_RPC_URL}
+    chain_id: 1
+  
+  polygon_zkevm:
+    rpc_url: ${POLYGON_ZKEVM_RPC_URL}
+    chain_id: 1101
+  
+  arbitrum:
+    rpc_url: ${ARBITRUM_RPC_URL}
+    chain_id: 42161
+  
+  optimism:
+    rpc_url: ${OPTIMISM_RPC_URL}
+    chain_id: 10
+  
+  base:
+    rpc_url: ${BASE_RPC_URL}
+    chain_id: 8453
+  
+  # DEX Aggregators
+  oneinch:
+    api_url: https://api.1inch.io/v5.0
+    api_key: ${ONEINCH_API_KEY}
+  
+  # Options Platforms
+  opyn:
+    api_url: https://api.opyn.fi
+    api_key: ${OPYN_API_KEY}
+  
+  # Perpetuals Platforms
+  dydx:
+    api_url: https://api.dydx.exchange/v3
+    api_key: ${DYDX_API_KEY}
+    api_secret: ${DYDX_API_SECRET}
+    api_passphrase: ${DYDX_API_PASSPHRASE}
+  
+  gmx:
+    api_url: https://api.gmx.io
+    api_key: ${GMX_API_KEY}
+
+# ============================================================
+# STRATEGY CONFIGURATIONS - ALL 16 STRATEGIES
+# ============================================================
+
+## BASIC STRATEGIES (1-6)
+
+strategies:
+  # 1. Triangular Arbitrage - Basic Strategy
+  triangular_arbitrage:
+    enabled: true
+    name: "Triangular Arbitrage"
+    category: basic
+    min_profit_threshold: 0.003  # 0.3%
+    max_slippage: 0.002  # 0.2%
+    execution_timeout: 5000  # ms
+    max_position_size: 50000  # USD
+    chains:
+      - polygon_zkevm
+      - arbitrum
+      - optimism
+      - base
+    dexes:
+      - quickswap
+      - uniswap_v3
+      - sushiswap
+      - camelot
+    risk_level: medium
+    scan_interval: 5000  # ms
+    
+  # 2. Options Arbitrage - Basic Strategy
+  options_arbitrage:
+    enabled: true
+    name: "Options Arbitrage"
+    category: basic
+    min_profit_threshold: 0.01  # 1%
+    max_slippage: 0.005  # 0.5%
+    execution_timeout: 10000  # ms
+    max_position_size: 100000  # USD
+    platforms:
+      - opyn
+    risk_management:
+      max_position_size: 100000  # USD
+      stop_loss: 0.05  # 5%
+    risk_level: medium
+    scan_interval: 10000  # ms
+    
+  # 3. Perpetuals Arbitrage - Basic Strategy
+  perpetuals_arbitrage:
+    enabled: true
+    name: "Perpetuals Arbitrage"
+    category: basic
+    min_profit_threshold: 0.005  # 0.5%
+    max_slippage: 0.003  # 0.3%
+    execution_timeout: 8000  # ms
+    max_position_size: 200000  # USD
+    platforms:
+      - dydx
+      - gmx
+    leverage: 3
+    risk_level: high
+    scan_interval: 5000  # ms
+    
+  # 4. Gamma Scalping - Basic Strategy
+  gamma_scalping:
+    enabled: true
+    name: "Gamma Scalping"
+    category: basic
+    rebalance_threshold: 0.02  # 2% delta deviation
+    execution_timeout: 15000  # ms
+    max_position_size: 75000  # USD
+    platforms:
+      - opyn
+    risk_level: medium
+    scan_interval: 15000  # ms
+    
+  # 5. Delta-Neutral - Basic Strategy
+  delta_neutral:
+    enabled: true
+    name: "Delta-Neutral Arbitrage"
+    category: basic
+    target_delta: 0
+    rebalance_threshold: 0.01  # 1%
+    execution_timeout: 20000  # ms
+    max_position_size: 150000  # USD
+    instruments:
+      - options
+      - futures
+      - spot
+    risk_level: low
+    scan_interval: 30000  # ms
+    
+  # 6. Cross-Exchange Arbitrage - Basic Strategy
+  cross_exchange_arbitrage:
+    enabled: true
+    name: "Cross-Exchange Arbitrage"
+    category: basic
+    min_spread: 0.0005  # 0.05%
+    max_execution_time: 50  # ms
+    exchanges: 50
+    pairs: 200
+    max_position_size: 100000  # USD
+    risk_level: medium
+    scan_interval: 3000  # ms
+
+  ## ENTERPRISE STRATEGIES (7-10)
+    
+  # 7. Statistical Arbitrage - Enterprise Strategy
+  statistical_arbitrage:
+    enabled: true
+    name: "Statistical Arbitrage"
+    category: enterprise
+    lookback_period: 1000
+    z_score_threshold: 2.0
+    holding_period: 300  # 5 minutes
+    pairs: 100
+    max_position_size: 200000  # USD
+    risk_level: medium
+    scan_interval: 60000  # ms
+    models:
+      - mean_reversion
+      - pairs_trading
+      - momentum
+      
+  # 8. Batch Auction Arbitrage - Enterprise Strategy
+  batch_auction_arbitrage:
+    enabled: true
+    name: "Batch Auction Arbitrage"
+    category: enterprise
+    batch_window: 30000  # 30 seconds
+    min_orders: 10
+    max_orders: 1000
+    solvers: 20
+    max_position_size: 300000  # USD
+    platforms:
+      - cow_protocol
+      - protocol_guild
+    risk_level: low
+    scan_interval: 30000  # ms
+    
+  # 9. Path Optimization Arbitrage - Enterprise Strategy
+  path_optimization_arbitrage:
+    enabled: true
+    name: "Path Optimization Arbitrage"
+    category: enterprise
+    max_hops: 5
+    liquidity_sources: 100
+    refresh_rate: 50  # ms
+    max_splits: 10
+    max_position_size: 250000  # USD
+    dex_aggregators:
+      - oneinch
+      - paraswap
+      - 0x
+    risk_level: medium
+    scan_interval: 2000  # ms
+    
+  # 10. Cross-Asset Arbitrage - Enterprise Strategy
+  cross_asset_arbitrage:
+    enabled: true
+    name: "Cross-Asset Arbitrage"
+    category: enterprise
+    min_profit_threshold: 0.01  # 1%
+    assets:
+      - crypto
+      - stocks
+      - forex
+    bridges:
+      - wormhole
+      - layerzero
+      - axelar
+    max_position_size: 500000  # USD
+    risk_level: high
+    scan_interval: 60000  # ms
+
+  ## ADVANCED STRATEGIES (11-16) - AI/ML Powered
+    
+  # 11. ML Arbitrage Scanner - Advanced Strategy
+  arbitrage_scanner:
+    enabled: true
+    name: "ML Arbitrage Scanner"
+    category: advanced
+    min_spread_bps: 5
+    min_liquidity_usd: 10000
+    max_position_size: 150000  # USD
+    models:
+      - lstm
+      - transformer
+      - random_forest
+    risk_level: medium
+    scan_interval: 5000  # ms
+    ml_pipeline_enabled: true
+    
+  # 12. Options Arbitrage Scanner - Advanced Strategy
+  options_arbitrage_scanner:
+    enabled: true
+    name: "Options Arbitrage Scanner"
+    category: advanced
+    min_mispricing: 0.005  # 0.5%
+    max_position_size: 100000  # USD
+    platforms:
+      - opyn
+      - gamma
+      - pyrisd
+    black_scholes_enabled: true
+    risk_level: medium
+    scan_interval: 10000  # ms
+    
+  # 13. Perpetuals Arbitrage Scanner - Advanced Strategy
+  perpetuals_arbitrage_scanner:
+    enabled: true
+    name: "Perpetuals Arbitrage Scanner"
+    category: advanced
+    min_price_diff_pct: 0.3  # 0.3%
+    max_leverage: 10
+    max_position_size: 200000  # USD
+    platforms:
+      - dydx
+      - gmx
+      - vertex
+    funding_rate_threshold: 0.0001
+    risk_level: high
+    scan_interval: 5000  # ms
+    
+  # 14. Gamma Scalping Manager - Advanced Strategy
+  gamma_scalping_manager:
+    enabled: true
+    name: "Gamma Scalping Manager"
+    category: advanced
+    rebalance_threshold: 0.02  # 2%
+    auto_hedge: true
+    max_position_size: 75000  # USD
+    platforms:
+      - opyn
+      - gamma
+    ai_hedging: true
+    risk_level: medium
+    scan_interval: 15000  # ms
+    
+  # 15. Delta Neutral Manager - Advanced Strategy
+  delta_neutral_manager:
+    enabled: true
+    name: "Delta Neutral Manager"
+    category: advanced
+    target_delta: 0
+    rebalance_threshold: 0.01  # 1%
+    auto_rebalance: true
+    max_position_size: 150000  # USD
+    ai_portfolio_management: true
+    risk_level: low
+    scan_interval: 30000  # ms
+    
+  # 16. Apex Optimizer - Advanced Strategy
+  apex_optimizer:
+    enabled: true
+    name: "Apex Optimizer"
+    category: advanced
+    optimization_frequency: 60  # seconds
+    max_position_size: 500000  # USD
+    root_cause_analysis: true
+    feedback_loop: true
+    ai_optimization: true
+    risk_level: medium
+    scan_interval: 60000  # ms
+
+# ============================================================
+# RISK MANAGEMENT - Global Settings
+# ============================================================
+risk_management:
+  max_total_exposure: 1000000  # USD
+  max_daily_loss: 50000  # USD
+  var_confidence: 0.999
+  
+  position_limits:
+    single_asset: 0.05  # 5% of portfolio
+    single_strategy: 0.10  # 10% of portfolio
+    total_leverage: 3.0
+  
+  circuit_breakers:
+    rapid_loss_threshold: 0.03  # 3%
+    rapid_loss_window: 300  # 5 minutes
+    cooldown_period: 600  # 10 minutes
+    emergency_stop: 0.10  # 10%
+    
+  # Risk limits per category
+  category_limits:
+    basic:
+      max_exposure: 500000
+      max_daily_loss: 25000
+    enterprise:
+      max_exposure: 300000
+      max_daily_loss: 15000
+    advanced:
+      max_exposure: 200000
+      max_daily_loss: 10000
+
+# ============================================================
+# EXECUTION SETTINGS
+# ============================================================
+execution:
+  gas_optimization:
+    enabled: true
+    max_gas_price: 100  # gwei
+    gas_price_strategy: dynamic
+    EIP1559: true
+    
+  atomic_execution:
+    enabled: true
+    rollback_on_failure: true
+    timeout_protection: true
+    
+  mev_protection:
+    enabled: true
+    bundle_submission: true
+    flashbots: true
+    mev_protect: true
+    
+  # Slippage protection
+  slippage:
+    default_slippage: 0.002  # 0.2%
+    max_slippage: 0.01  # 1%
+    
+  # Order types
+  order_types:
+    - limit
+    - market
+    - gtc
+    - fok
+    - ioc
+
+# ============================================================
+# MONITORING & ALERTS
+# ============================================================
+monitoring:
+  metrics_enabled: true
+  metrics_endpoint: ${PROMETHEUS_ENDPOINT}
+  metrics_port: 9090
+  
+  alerts_enabled: true
+  alert_endpoints:
+    - slack
+    - pagerduty
+    - email
+  
+  # Logging configuration
+  logging:
+    level: INFO
+    format: json
+    outputs:
+      - console
+      - file
+      - cloudwatch
+    rotation:
+      max_size: 100MB
+      max_files: 10
+      
+  # Health checks
+  health_check:
+    enabled: true
+    interval: 60  # seconds
+    endpoint: /health
+    
+  # Performance metrics
+  performance:
+    latency_threshold_ms: 100
+    error_rate_threshold: 0.01  # 1%
+    success_rate_target: 0.99  # 99%
+
+# ============================================================
+# DATABASE & CACHE
+# ============================================================
+database:
+  url: ${DATABASE_URL}
+  pool_size: 20
+  max_overflow: 10
+  pool_timeout: 30
+  
+redis:
+  url: ${REDIS_URL}
+  max_connections: 50
+  socket_timeout: 5
+
+# ============================================================
+# SERVICE COMMUNICATION
+# ============================================================
+services:
+  user_api:
+    url: ${USER_API_URL}
+    timeout: 30
+    
+  brain_orchestrator:
+    url: ${BRAIN_ORCHESTRATOR_URL}
+    timeout: 30
+    
+  copilot_agent:
+    url: ${COPILOT_AGENT_URL}
+    timeout: 30
+    
+  compliance:
+    url: ${COMPLIANCE_SERVICE_URL}
+    timeout: 10
+    
+  blockchain_monitor:
+    url: ${BLOCKCHAIN_MONITOR_URL}
+    timeout: 30
+    
+  financial_reconciliation:
+    url: ${FINANCIAL_RECONCILIATION_URL}
+    timeout: 60
