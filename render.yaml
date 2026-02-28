@@ -1,0 +1,15 @@
+# Alpha-Orion Dashboard Deployment
+# Simplified deployment using Node.js to serve static files
+
+services:
+  - type: web
+    name: alpha-orion-dashboard
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: dashboard
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s dist -l $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: "18"
